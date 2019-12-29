@@ -35,18 +35,17 @@ class RadCam:
 
     # Only accounting for single channel images.
     def heat_map(self, image: IMAGE):
-        # Perturb
         perturber = Perturber(np.array(image), self.filter_dims)
         perturbed_array = perturber.perturb(Perturbation.black)
         indices = perturber.block_locations
-
-        # Infer
-        preds = [self.model.predict(Image.fromarray(img)) for img in perturbed_array]
-
-        # Generate Data for Viz
-        fig = self.generate_figure(image, indices, preds)
-        # Generate Viz
-        return go.Figure(fig)
+        preds = np.array(
+            [self.model.predict(Image.fromarray(img)) for img in perturbed_array]
+        )
+        preds_by_class = preds.T
+        return [
+            go.Figure(self.generate_figure(image, indices, probs))
+            for probs in preds_by_class
+        ]
 
     def generate_figure(self, image, verticies, heat_values):
         image = image.resize((self.image_width, self.image_height))
@@ -110,7 +109,7 @@ class RadCam:
                     "line": {"color": "rgba(50, 255, 40, .4)"},
                 }
                 rect["fillcolor"] = "rgba(50, 255, 40, {})".format(
-                    np.around(heat[heat_pos][0], decimals=2)
+                    np.around(heat[heat_pos], decimals=2)
                 )
                 shapes.append(rect)
                 heat_pos += 1
