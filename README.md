@@ -36,4 +36,4 @@ for heatmap in heatmaps:
     heatmap.show()
 ```
 
-[radcam](radcam.png)
+![radcam](radcam.png)
