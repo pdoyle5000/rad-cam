@@ -33,14 +33,16 @@ class RadCam:
         self.image_height = image_height
         self.filter_dims = filter_dims
 
-    # Only accounting for single channel images.
     def heat_map(self, image: IMAGE):
         perturber = Perturber(np.array(image), self.filter_dims)
         perturbed_array = perturber.perturb(Perturbation.black)
         indices = perturber.block_locations
+        actual_pred = self.model.predict(image)
         preds = np.array(
             [self.model.predict(Image.fromarray(img)) for img in perturbed_array]
         )
+        preds = np.absolute(actual_pred - preds)
+
         preds_by_class = preds.T
         return [
             go.Figure(self.generate_figure(image, indices, probs))

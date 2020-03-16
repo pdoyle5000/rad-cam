@@ -22,7 +22,7 @@ class Perturber:
         self.filter_size = filter_size
         self.block_locations = self._get_blocks()
 
-    def perturb(self, perturbation_type: Perturbation) -> np.array:
+    def perturb(self, perturbation_type: Perturbation = Perturbation.black) -> np.array:
         perturbation_map = {Perturbation.black: self._apply_black}
         return perturbation_map[perturbation_type]()
 
