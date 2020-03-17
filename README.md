@@ -5,6 +5,8 @@ Radcam utilizes plotly figures to create a heatmap
 of important image features with hover-over predictions
 for each class. (Currently only for pytorch)
 
+Special Thanks to [@seantur](https://github.com/seantur)
+
 
 ### Install
 Clone repo and install:
