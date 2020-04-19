@@ -18,7 +18,7 @@ STD_DIM = 256
 
 
 class ModelProtocol(Protocol):
-    def predict(self, image: IMAGE) -> List[float]:
+    def predict(self, image: IMAGE) -> Union[list, np.ndarray, torch.Tensor]:
         ...
 
 
@@ -29,23 +29,27 @@ class RadCam:
         filter_dims: Tuple[int, int] = (1, 1),
         image_width: int = STD_DIM,
         image_height: int = STD_DIM,
+        tuple_index: int = None,
     ):
         self.model = model
         self.image_width = image_width
         self.image_height = image_height
         self.filter_dims = filter_dims
+        self.tuple_index = tuple_index
 
     def heat_map(self, image: IMAGE):
         image = _convert_type(image)
         perturber = Perturber(np.array(image), self.filter_dims)
         perturbed_array = perturber.perturb(Perturbation.black)
         indices = perturber.block_locations
-        actual_pred = _convert_type(self.model.predict(image))
-        #actual_pred = self.model.predict(image)
-        # verify this for multiple output types.
-        #actual_pred = _convert_type(actual_pred)
-        preds = np.array([
-            self.model.predict(Image.fromarray(img)) for img in perturbed_array])
+        actual_pred = self.model.predict(image)
+        if self.tuple_index:
+            actual_pred = actual_pred[self.tuple_index]
+        actual_pred = _convert_type(actual_pred)
+        preds = [self.model.predict(Image.fromarray(img)) for img in perturbed_array]
+        if self.tuple_index:
+            preds = [_convert_type(pred[self.tuple_index]) for pred in preds]
+        preds = np.array(preds)
         diffs = calculate_diffs(actual_pred, preds)
         if len(diffs.shape) == 1:  # Torch tensors can get flattened.
             diffs = np.expand_dims(diffs, axis=1)
@@ -55,7 +59,9 @@ class RadCam:
         ]
 
     def generate_figure(self, image, verticies, heat_values):
-        image = image.resize((self.image_width, self.image_height))  # Torch tensors can get flattened.
+        image = image.resize(
+            (self.image_width, self.image_height)
+        )  # Torch tensors can get flattened.
         data = self._generate_points(heat_values)
         return {
             "data": [data],
@@ -150,7 +156,10 @@ class RadCam:
 def calculate_diffs(actual_preds, perturb_preds):
     return np.absolute(actual_preds - perturb_preds)
 
-def _convert_type(preds: Union[torch.Tensor, pd.DataFrame, np.ndarray, list]) -> np.ndarray:
+
+def _convert_type(
+    preds: Union[torch.Tensor, pd.DataFrame, np.ndarray, list]
+) -> np.ndarray:
     if isinstance(preds, torch.Tensor):
         return preds.numpy()
     if isinstance(preds, list):
