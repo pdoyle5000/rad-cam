@@ -4,6 +4,7 @@ from io import BytesIO
 import base64
 import torch
 import pandas as pd
+from enum import Enum, unique
 from typing import Union, List, Tuple
 from typing_extensions import Protocol
 from PIL.JpegImagePlugin import JpegImageFile
@@ -15,6 +16,16 @@ from radcam.perturber import Perturber, Perturbation
 
 IMAGE = Union[JpegImageFile, PngImageFile]
 STD_DIM = 256
+
+
+@unique
+class Colors(Enum):
+    green = "rgba(50, 255, 40,"
+    orange = "rgba(255, 181, 43,"
+    red = "rgba(255, 0, 0,"
+    blue = "rgba(0, 166, 255,"
+    yellow = "rgba(255, 255, 0,"
+    magenta = "rgba(255, 0, 234,"
 
 
 class ModelProtocol(Protocol):
@@ -30,12 +41,14 @@ class RadCam:
         image_width: int = STD_DIM,
         image_height: int = STD_DIM,
         tuple_index: int = None,
+        color: Colors = Colors.orange
     ):
         self.model = model
         self.image_width = image_width
         self.image_height = image_height
         self.filter_dims = filter_dims
         self.tuple_index = tuple_index
+        self.color = color
 
     def heat_map(self, image: IMAGE):
         image = _convert_type(image)
@@ -113,17 +126,16 @@ class RadCam:
         while pos_y + height <= self.image_height:
             pos_x = 0
             while pos_x + width <= self.image_width:
+                intensity = np.around(heat[heat_pos], decimals=2)
                 rect = {
                     "type": "rect",
                     "x0": pos_x,
                     "y0": pos_y,
                     "x1": pos_x + width,
                     "y1": pos_y + height,
-                    "line": {"color": "rgba(50, 255, 40, .4)"},
+                    "line": {"color": f"{self.color.value} {intensity})"},
+                    "fillcolor": f"{self.color.value} {intensity})"
                 }
-                rect["fillcolor"] = "rgba(50, 255, 40, {})".format(
-                    np.around(heat[heat_pos], decimals=2)
-                )
                 shapes.append(rect)
                 heat_pos += 1
                 pos_x += width
