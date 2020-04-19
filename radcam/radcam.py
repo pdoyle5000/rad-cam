@@ -2,6 +2,8 @@ import numpy as np
 import plotly.graph_objects as go
 from io import BytesIO
 import base64
+import torch
+import pandas as pd
 from typing import Union, List, Tuple
 from typing_extensions import Protocol
 from PIL.JpegImagePlugin import JpegImageFile
@@ -34,23 +36,26 @@ class RadCam:
         self.filter_dims = filter_dims
 
     def heat_map(self, image: IMAGE):
+        image = _convert_type(image)
         perturber = Perturber(np.array(image), self.filter_dims)
         perturbed_array = perturber.perturb(Perturbation.black)
         indices = perturber.block_locations
-        actual_pred = self.model.predict(image)
-        preds = np.array(
-            [self.model.predict(Image.fromarray(img)) for img in perturbed_array]
-        )
-        preds = np.absolute(actual_pred - preds)
-
-        preds_by_class = preds.T
+        actual_pred = _convert_type(self.model.predict(image))
+        #actual_pred = self.model.predict(image)
+        # verify this for multiple output types.
+        #actual_pred = _convert_type(actual_pred)
+        preds = np.array([
+            self.model.predict(Image.fromarray(img)) for img in perturbed_array])
+        diffs = calculate_diffs(actual_pred, preds)
+        if len(diffs.shape) == 1:  # Torch tensors can get flattened.
+            diffs = np.expand_dims(diffs, axis=1)
         return [
-            go.Figure(self.generate_figure(image, indices, probs))
-            for probs in preds_by_class
+            go.Figure(self.generate_figure(image, indices, np.squeeze(probs)))
+            for probs in diffs.T
         ]
 
     def generate_figure(self, image, verticies, heat_values):
-        image = image.resize((self.image_width, self.image_height))
+        image = image.resize((self.image_width, self.image_height))  # Torch tensors can get flattened.
         data = self._generate_points(heat_values)
         return {
             "data": [data],
@@ -140,3 +145,14 @@ class RadCam:
             "hoverinfo": "text",
             "opacity": 0.05,
         }
+
+
+def calculate_diffs(actual_preds, perturb_preds):
+    return np.absolute(actual_preds - perturb_preds)
+
+def _convert_type(preds: Union[torch.Tensor, pd.DataFrame, np.ndarray, list]) -> np.ndarray:
+    if isinstance(preds, torch.Tensor):
+        return preds.numpy()
+    if isinstance(preds, list):
+        return np.array(preds)
+    return preds
