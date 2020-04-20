@@ -25,34 +25,30 @@ class Perturber:
         if perturbation_type == Perturbation.gaussian:
             return self._apply_gaussian()
         perturbation_map = {
-                Perturbation.black: self._apply_black,
-                Perturbation.white: self._apply_white,
-                Perturbation.noise: self._apply_noise,
-                Perturbation.median: self._apply_median,
-                Perturbation.mean: self._apply_mean}
+            Perturbation.black: self._apply_black,
+            Perturbation.white: self._apply_white,
+            Perturbation.noise: self._apply_noise,
+            Perturbation.median: self._apply_median,
+            Perturbation.mean: self._apply_mean,
+        }
         return perturbation_map[perturbation_type]()
 
     def _apply_black(self):
-        return self._apply_simple_filter(
-                np.zeros(self.filter_size, dtype=int))
+        return self._apply_simple_filter(np.zeros(self.filter_size, dtype=int))
 
     def _apply_white(self):
-        return self._apply_simple_filter(
-                np.full(self.filter_size, 255, dtype=int))
+        return self._apply_simple_filter(np.full(self.filter_size, 255, dtype=int))
 
     def _apply_noise(self):
-        return self._apply_simple_filter(
-                np.random.randint(256, size=self.filter_size))
+        return self._apply_simple_filter(np.random.randint(256, size=self.filter_size))
 
     def _apply_mean(self):
         mean = np.mean(self.input_array)
-        return self._apply_simple_filter(
-                np.full(self.filter_size, mean, dtype=int))
+        return self._apply_simple_filter(np.full(self.filter_size, mean, dtype=int))
 
     def _apply_median(self):
         median = np.median(self.input_array)
-        return self._apply_simple_filter(
-                np.full(self.filter_size, median, dtype=int))
+        return self._apply_simple_filter(np.full(self.filter_size, median, dtype=int))
 
     def _apply_gaussian(self):
         # cant just apply a filter.
@@ -73,6 +69,14 @@ class Perturber:
         block_locs = []
         for x in range(0, self.input_array.shape[1] - 1, self.filter_size[0]):
             for y in range(0, self.input_array.shape[0] - 1, self.filter_size[1]):
-                block_locs.append((x, y))
+                if all(
+                    [
+                        (x + self.filter_size[0] <= self.input_array.shape[1]),
+                        (y + self.filter_size[1] <= self.input_array.shape[0]),
+                    ]
+                ):
+                    print(x)
+                    print(y)
+                    block_locs.append((x, y))
         self.block_locations = block_locs
         return block_locs
