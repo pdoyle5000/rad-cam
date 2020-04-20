@@ -9,7 +9,7 @@ class TestPerturber(unittest.TestCase):
         self.single_chan_input_imperfect = np.full((5, 5), 1)
         self.rgb_input_perfect = np.full((4, 4, 3), 1)
 
-    def test_perturb_perfect_size(self):
+    def test_perturb_black_perfect_size(self):
         ideal_black_output = np.array(
             [
                 [[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]],
@@ -22,6 +22,20 @@ class TestPerturber(unittest.TestCase):
             Perturbation.black
         )
         np.testing.assert_array_equal(ideal_black_output, output)
+
+    def test_perturb_white_perfect_size(self):
+        ideal_white_output = np.array(
+            [
+                [[255, 255, 1, 1], [255, 255, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]],
+                [[1, 1, 255, 255], [1, 1, 255, 255], [1, 1, 1, 1], [1, 1, 1, 1]],
+                [[1, 1, 1, 1], [1, 1, 1, 1], [255, 255, 1, 1], [255, 255, 1, 1]],
+                [[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 255, 255], [1, 1, 255, 255]],
+            ]
+        )
+        output = Perturber(self.single_chan_input_perfect, filter_size=(2, 2)).perturb(
+            Perturbation.white
+        )
+        np.testing.assert_array_equal(ideal_white_output, output)
 
     def test_perturb_imperfect_size(self):
         ideal_black_output = np.array(

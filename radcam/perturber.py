@@ -43,11 +43,11 @@ class Perturber:
         return self._apply_simple_filter(np.random.randint(256, size=self.filter_size))
 
     def _apply_mean(self):
-        mean = np.mean(self.input_array)
+        mean = int(np.mean(self.input_array))
         return self._apply_simple_filter(np.full(self.filter_size, mean, dtype=int))
 
     def _apply_median(self):
-        median = np.median(self.input_array)
+        median = int(np.median(self.input_array))
         return self._apply_simple_filter(np.full(self.filter_size, median, dtype=int))
 
     def _apply_gaussian(self):
@@ -75,8 +75,6 @@ class Perturber:
                         (y + self.filter_size[1] <= self.input_array.shape[0]),
                     ]
                 ):
-                    print(x)
-                    print(y)
                     block_locs.append((x, y))
         self.block_locations = block_locs
         return block_locs
