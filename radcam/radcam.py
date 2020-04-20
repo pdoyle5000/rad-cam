@@ -41,7 +41,7 @@ class RadCam:
         image_width: int = STD_DIM,
         image_height: int = STD_DIM,
         tuple_index: int = None,
-        color: Colors = Colors.orange
+        color: Colors = Colors.orange,
     ):
         self.model = model
         self.image_width = image_width
@@ -133,8 +133,8 @@ class RadCam:
                     "y0": pos_y,
                     "x1": pos_x + width,
                     "y1": pos_y + height,
-                    "line": {"color": f"{self.color.value} {intensity})"},
-                    "fillcolor": f"{self.color.value} {intensity})"
+                    "line_width": 0,
+                    "fillcolor": f"{self.color.value} {intensity})",
                 }
                 shapes.append(rect)
                 heat_pos += 1
