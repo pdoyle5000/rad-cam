@@ -1,8 +1,9 @@
-from scipy.ndimage.filters import gaussian_filter
-import numpy as np
-from typing import Tuple
-from enum import Enum, unique
 from copy import deepcopy
+from enum import Enum, unique
+from typing import Tuple
+
+import numpy as np
+from scipy.ndimage.filters import gaussian_filter
 
 
 @unique

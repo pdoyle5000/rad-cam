@@ -1,18 +1,18 @@
-import numpy as np
-import plotly.graph_objects as go
-from io import BytesIO
 import base64
-import torch
-import pandas as pd
 from enum import Enum, unique
-from typing import Union, List, Tuple
-from typing_extensions import Protocol
+from io import BytesIO
+from typing import List, Tuple, Union
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+import torch
+from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 from PIL.PngImagePlugin import PngImageFile
-from PIL import Image
+from typing_extensions import Protocol
 
-from radcam.perturber import Perturber, Perturbation
-
+from radcam.perturber import Perturbation, Perturber
 
 IMAGE = Union[JpegImageFile, PngImageFile]
 STD_DIM = 256
@@ -50,10 +50,10 @@ class RadCam:
         self.tuple_index = tuple_index
         self.color = color
 
-    def heat_map(self, image: IMAGE):
+    def heat_map(self, image: IMAGE, perturbation: Perturbation = Perturbation.black):
         image = _convert_type(image)
         perturber = Perturber(np.array(image), self.filter_dims)
-        perturbed_array = perturber.perturb(Perturbation.black)
+        perturbed_array = perturber.perturb(perturbation)
         indices = perturber.block_locations
         actual_pred = self.model.predict(image)
         if self.tuple_index:

@@ -1,9 +1,11 @@
 import unittest
-import torch
 from typing import List, Tuple
+
 import numpy as np
+import torch
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
+
 from radcam.radcam import RadCam, calculate_diffs
 
 
