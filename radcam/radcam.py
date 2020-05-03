@@ -1,9 +1,11 @@
 from enum import Enum, unique
 from typing import Tuple, Union
 
+import math
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from ipywidgets import HBox, VBox
 import torch
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
@@ -161,6 +163,27 @@ class RadCam:
             "hoverinfo": "text",
             "opacity": 0.05,
         }
+
+    @classmethod
+    def show(cls, heatmaps, labels=None, cols=None):
+        if not cols:  # default to 1 row with n plots.
+            cols = len(heatmaps)
+
+        widget_row = []
+        widget_table = []
+        col = 0
+        for i, heatmap in enumerate(heatmaps):
+            if col >= cols:
+                widget_table.append(HBox(widget_row))
+                widget_row = []
+                col = 0
+            fw = go.FigureWidget(heatmap)
+            if labels:
+                fw.update_layout(xaxis_title=labels[i])
+            widget_row.append(fw)
+            col += 1
+        widget_table.append(HBox(widget_row))
+        return VBox(widget_table)
 
 
 def calculate_diffs(actual_preds, perturb_preds):
