@@ -1,18 +1,16 @@
 from enum import Enum, unique
 from typing import Tuple, Union
 
-import math
 import numpy as np
-import pandas as pd
 import plotly.graph_objects as go
-from ipywidgets import HBox, VBox
 import torch
+from ipywidgets import HBox, VBox
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 from PIL.PngImagePlugin import PngImageFile
 from typing_extensions import Protocol
 
-from radcam.perturber import Perturber, Perturbation
+from radcam.perturber import Perturbation, Perturber
 
 IMAGE = Union[JpegImageFile, PngImageFile]
 STD_DIM = 128
@@ -191,9 +189,7 @@ def calculate_diffs(actual_preds, perturb_preds):
     return np.absolute(actual_preds - perturb_preds)
 
 
-def _convert_type(
-    preds: Union[torch.Tensor, pd.DataFrame, np.ndarray, list]
-) -> np.ndarray:
+def _convert_type(preds: Union[torch.Tensor, np.ndarray, list]) -> np.ndarray:
     if isinstance(preds, torch.Tensor):
         return preds.numpy()
     if isinstance(preds, list):

@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "radcam"
+version = "1.0.0"
+description = "simple image perturber for CNN visualization"
+authors = ["pdoyle5000 <pdoyle5000@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pillow = "^7.1.2"
+numpy = "^1.18.4"
+plotly = "^4.7.1"
+ipywidgets = "^7.5.1"
+torch = "^1.5.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.4.2"
+black = "^19.10b0"
+isort = "^4.3.21"
+pytest-cov = "^2.8.1"
+mypy = "^0.770"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
