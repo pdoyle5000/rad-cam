@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from radcam.perturber import Perturbation, Perturber
+from radcam.perturber import Perturber
+from radcam.radcam import Perturbation
 
 
 class TestPerturber(unittest.TestCase):

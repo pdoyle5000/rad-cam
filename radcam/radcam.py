@@ -12,10 +12,10 @@ from PIL.JpegImagePlugin import JpegImageFile
 from PIL.PngImagePlugin import PngImageFile
 from typing_extensions import Protocol
 
-from radcam.perturber import Perturbation, Perturber
+from radcam.perturber import Perturber, Perturbation
 
 IMAGE = Union[JpegImageFile, PngImageFile]
-STD_DIM = 256
+STD_DIM = 128
 
 
 @unique
@@ -37,7 +37,7 @@ class RadCam:
     def __init__(
         self,
         model: ModelProtocol,
-        filter_dims: Tuple[int, int] = (1, 1),
+        filter_dims: Tuple[int, int] = (16, 16),
         image_width: int = STD_DIM,
         image_height: int = STD_DIM,
         tuple_index: int = None,
@@ -56,6 +56,7 @@ class RadCam:
         perturbed_array = perturber.perturb(perturbation)
         indices = perturber.block_locations
         actual_pred = self.model.predict(image)
+        # assume pred per class, flag for just one pred.
         if self.tuple_index:
             actual_pred = actual_pred[self.tuple_index]
         actual_pred = _convert_type(actual_pred)
